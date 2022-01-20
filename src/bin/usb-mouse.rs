@@ -62,24 +62,24 @@ mod app {
         (Shared { hid }, Local { usb_dev }, init::Monotonics())
     }
 
-    #[idle(shared = [hid], local=[counter: u8 = 0])]
+    #[idle(shared = [hid])]
     fn idle(mut ctx: idle::Context) -> ! {
-        let counter = ctx.local.counter;
+        let mut counter = 0;
         loop {
             let report = MouseReport {
-                x: if *counter < 64 { 3 } else { -3 },
+                x: if counter < 64 { 3 } else { -3 },
                 y: 0,
                 buttons: 0,
                 wheel: 0,
                 pan: 0,
             };
             ctx.shared.hid.lock(|hid| hid.push_input(&report).ok());
-            *counter = (*counter + 1) % 128;
+            counter = (counter + 1) % 128;
             cortex_m::asm::delay(500_000);
         }
     }
 
-    #[task(binds=USBCTRL_IRQ, shared = [hid], local=[usb_dev])]
+    #[task(binds=USBCTRL_IRQ, shared = [hid], local = [usb_dev])]
     fn on_usb(mut ctx: on_usb::Context) {
         let usb_dev = ctx.local.usb_dev;
         ctx.shared.hid.lock(|hid| if !usb_dev.poll(&mut [hid]) {});
