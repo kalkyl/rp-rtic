@@ -11,8 +11,7 @@ mod app {
         XOSC_CRYSTAL_FREQ,
     };
     use usb_device::{class_prelude::*, prelude::*};
-    use usbd_hid::descriptor::generator_prelude::*;
-    use usbd_hid::descriptor::MouseReport;
+    use usbd_hid::descriptor::{generator_prelude::*, MouseReport};
     use usbd_hid::hid_class::HIDClass;
 
     #[shared]
@@ -79,7 +78,7 @@ mod app {
         }
     }
 
-    #[task(binds=USBCTRL_IRQ, shared = [hid], local = [usb_dev])]
+    #[task(binds = USBCTRL_IRQ, shared = [hid], local = [usb_dev])]
     fn on_usb(mut ctx: on_usb::Context) {
         let usb_dev = ctx.local.usb_dev;
         ctx.shared.hid.lock(|hid| if !usb_dev.poll(&mut [hid]) {});
