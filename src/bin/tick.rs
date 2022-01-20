@@ -1,7 +1,7 @@
 #![no_std]
 #![no_main]
-use defmt_rtt as _;
-use panic_probe as _;
+
+use rp_rtic as _;
 
 #[rtic::app(device = rp_pico::hal::pac, peripherals = true, dispatchers = [XIP_IRQ])]
 mod app {
