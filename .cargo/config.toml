@@ -24,3 +24,7 @@ target = "thumbv6m-none-eabi"
 
 [env]
 DEFMT_LOG = "debug"
+
+[alias]
+rb = "run --bin"
+rrb = "run --release --bin"

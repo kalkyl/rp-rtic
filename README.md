@@ -1,6 +1,4 @@
-# rp-rtic
-
-Playground for RTIC on RP2040
+# Playground for RTIC on RP2040
 
 ## Dependencies
 
@@ -19,5 +17,5 @@ $ cargo install probe-run
 ## Run!
 
 ```console
-$ DEFMT_LOG=info cargo run
+$ DEFMT_LOG=info cargo rb monotonic
 ```
