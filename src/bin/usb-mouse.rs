@@ -5,6 +5,7 @@ use rp_rtic as _;
 
 #[rtic::app(device = rp_pico::hal::pac, peripherals = true)]
 mod app {
+    use core::mem::MaybeUninit;
     use defmt::*;
     use rp_pico::{
         hal::{clocks::init_clocks_and_plls, usb::UsbBus, watchdog::Watchdog},
@@ -24,7 +25,7 @@ mod app {
         usb_dev: UsbDevice<'static, UsbBus>,
     }
 
-    #[init(local = [usb_bus: Option<UsbBusAllocator<UsbBus>> = None])]
+    #[init(local = [usb_bus: MaybeUninit<UsbBusAllocator<UsbBus>> = MaybeUninit::uninit()])]
     fn init(c: init::Context) -> (Shared, Local, init::Monotonics) {
         let mut resets = c.device.RESETS;
         let mut watchdog = Watchdog::new(c.device.WATCHDOG);
@@ -41,7 +42,7 @@ mod app {
         .unwrap();
 
         let usb_bus = c.local.usb_bus;
-        usb_bus.replace(UsbBusAllocator::new(UsbBus::new(
+        let usb_bus = usb_bus.write(UsbBusAllocator::new(UsbBus::new(
             c.device.USBCTRL_REGS,
             c.device.USBCTRL_DPRAM,
             clocks.usb_clock,
@@ -49,8 +50,8 @@ mod app {
             &mut resets,
         )));
 
-        let hid = HIDClass::new(usb_bus.as_ref().unwrap(), MouseReport::desc(), 60);
-        let usb_dev = UsbDeviceBuilder::new(usb_bus.as_ref().unwrap(), UsbVidPid(0xc410, 0x0000))
+        let hid = HIDClass::new(usb_bus, MouseReport::desc(), 60);
+        let usb_dev = UsbDeviceBuilder::new(usb_bus, UsbVidPid(0xc410, 0x0000))
             .manufacturer("Fake company")
             .product("Mouse")
             .serial_number("TEST")
